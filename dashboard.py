@@ -235,16 +235,41 @@ with st.spinner("Sinkronisasi Database HR PLN... Mohon Tunggu."):
 with st.sidebar:
     st.markdown("### ⚡ Tower 5 Analytics")
     st.caption("Dashboard Perencanaan Suksesi Jabatan Struktural PLN")
+
+    # --- FILTER UNIT GLOBAL (daftar unit diambil dari Master HCBP) ---
+    st.markdown("🏢 **Filter Unit Induk**")
+    daftar_unit_induk = sorted(hcbp['UNIT INDUK'].dropna().unique().tolist()) if not hcbp.empty else []
+    list_unit_filter = ["-- Semua Unit --"] + daftar_unit_induk
+    selected_unit_filter = st.selectbox(
+        "Tampilkan data khusus untuk unit:",
+        list_unit_filter,
+        key="global_unit_filter"
+    )
+
+    if selected_unit_filter != "-- Semua Unit --":
+        st.success(f"🔒 Filter aktif: **{selected_unit_filter}**")
+
+    st.divider()
     
     # --- GLOBAL SEARCH ENGINE ---
     st.markdown("🔍 **Pencarian Global**")
     search_query = st.text_input("Cari Nama Pegawai atau Jabatan:")
+    if selected_unit_filter != "-- Semua Unit --":
+        st.caption(f"🔎 Pencarian dibatasi hanya di dalam unit **{selected_unit_filter}**.")
     
     st.divider()
 
-    total_pegawai = len(pegawai)
-    total_ews = int((pegawai['Status_EWS'] != 'Aman').sum())
-    total_unit = pegawai['Company Name'].nunique()
+    # Terapkan filter unit global ke ringkasan data
+    if selected_unit_filter != "-- Semua Unit --":
+        pegawai_f = pegawai[pegawai['Company Name'].str.upper() == selected_unit_filter.upper()].copy()
+        profiler_f = profiler[profiler['Company Name'].str.upper() == selected_unit_filter.upper()].copy()
+    else:
+        pegawai_f = pegawai
+        profiler_f = profiler
+
+    total_pegawai = len(pegawai_f)
+    total_ews = int((pegawai_f['Status_EWS'] != 'Aman').sum())
+    total_unit = pegawai_f['Company Name'].nunique()
 
     st.markdown("**📊 Ringkasan Data Terkini**")
     c1, c2 = st.columns(2)
@@ -362,8 +387,8 @@ def render_riwayat_jabatan(nip_kandidat):
 if search_query:
     st.markdown(f"## 🔍 Hasil Pencarian untuk: `{search_query}`")
     
-    pegawai_matched = profiler[profiler['Nama Lengkap'].str.lower().str.contains(search_query.lower(), na=False)]
-    jabatan_matched = pegawai[pegawai['Jabatan'].str.lower().str.contains(search_query.lower(), na=False)]
+    pegawai_matched = profiler_f[profiler_f['Nama Lengkap'].str.lower().str.contains(search_query.lower(), na=False)]
+    jabatan_matched = pegawai_f[pegawai_f['Jabatan'].str.lower().str.contains(search_query.lower(), na=False)]
     
     # ------------------------------------------------------
     # PENCARIAN NAMA PEGAWAI
@@ -512,8 +537,10 @@ else:
     with tab1:
         st.header("🚨 Peta Kerawanan Suksesi Jabatan (EWS)")
         st.markdown('<div class="tips-box">💡 <b>Tips Interaktif:</b> Klik pada salah satu kotak di treemap atau baris tabel untuk menelusuri data secara mendalam (<i>Deep Dive</i>).</div>', unsafe_allow_html=True)
+        if selected_unit_filter != "-- Semua Unit --":
+            st.caption(f"🏢 Menampilkan data khusus untuk unit: **{selected_unit_filter}**")
         
-        df_ews_aktif = pegawai[pegawai['Status_EWS'] != 'Aman'].copy()
+        df_ews_aktif = pegawai_f[pegawai_f['Status_EWS'] != 'Aman'].copy()
 
         m1, m2, m3 = st.columns(3)
         m1.metric("Total Kasus EWS", f"{len(df_ews_aktif):,}")
@@ -553,11 +580,24 @@ else:
 
             if len(event_up.selection.points) > 0:
                 pt_up = event_up.selection.points[0]
-                selected_up = pt_up.get("parent") or pt_up.get("label")
-                
+                clicked_label = pt_up.get("label")
+                clicked_parent = pt_up.get("parent")
+
+                if clicked_parent:
+                    # Kotak anak (leaf) diklik -> Business Area = parent, Personal Sub Area = label
+                    df_level3 = df_filtered_ui[
+                        (df_filtered_ui['Business Area'] == clicked_parent) &
+                        (df_filtered_ui['Personal Sub Area'] == clicked_label)
+                    ].copy()
+                    judul_level3 = clicked_label
+                else:
+                    # Kotak induk (Business Area) diklik langsung -> tampilkan semua di bawahnya
+                    df_level3 = df_filtered_ui[df_filtered_ui['Business Area'] == clicked_label].copy()
+                    judul_level3 = clicked_label
+
                 st.divider()
-                st.subheader(f"📋 Level 3: Daftar Personil Masuk Radar EWS di {selected_up}")
-                df_final_karyawan = df_filtered_ui[df_filtered_ui['Business Area'] == selected_up].copy()
+                st.subheader(f"📋 Level 3: Daftar Personil Masuk Radar EWS di {judul_level3}")
+                df_final_karyawan = df_level3
                 df_final_karyawan['Lama_Menjabat_Tahun'] = df_final_karyawan['Lama_Menjabat_Tahun'].round(1)
                 kolom_final = ['NIP', 'Nama Lengkap', 'Jabatan', 'Lama_Menjabat_Tahun', 'Umur Tahun', 'Status_EWS']
                 st.dataframe(df_final_karyawan[kolom_final], use_container_width=True, hide_index=True)
@@ -568,8 +608,10 @@ else:
     with tab2:
         st.header("🎯 Perencanaan Pengisian Jabatan Struktural (Suksesi)")
         st.markdown('<div class="tips-box">💡 <b>Tips Interaktif:</b> Klik pada kotak treemap atau baris tabel untuk menelusuri posisi kosong hingga memunculkan rekomendasi kandidat.</div>', unsafe_allow_html=True)
+        if selected_unit_filter != "-- Semua Unit --":
+            st.caption(f"🏢 Menampilkan data khusus untuk unit: **{selected_unit_filter}**")
 
-        df_jabatan_kosong = pegawai[pegawai['Status_EWS'] != 'Aman'].copy()
+        df_jabatan_kosong = pegawai_f[pegawai_f['Status_EWS'] != 'Aman'].copy()
         keywords_staff = ['officer', 'technician', 'tugas belajar', 'specialist', 'analyst', 'cuti']
         df_jabatan_kosong = df_jabatan_kosong[~df_jabatan_kosong['Jabatan'].str.lower().str.contains(r'\b(?:officer|technician|tugas belajar|specialist|analyst|cuti)\b', regex=True, na=False)]
 
@@ -831,7 +873,19 @@ else:
         df_kinerja_peg = df_kinerja_latest.merge(pegawai[['NIP', 'Nama Lengkap', 'Company Name', 'Business Area', 'Jabatan']], on='NIP', how='inner')
         
         list_ui_kpi = ["-- Pilih Unit Induk --"] + list(df_kinerja_peg['Company Name'].dropna().unique())
-        selected_ui_kpi = st.selectbox("👉 Pilih Unit Induk untuk Analisis KPI:", list_ui_kpi)
+
+        # Bypass otomatis: jika filter unit global (sidebar) aktif, langsung arahkan
+        # selectbox ke unit tersebut sehingga grafik KPI langsung tampil tanpa klik ganda.
+        default_index_kpi = 0
+        if selected_unit_filter != "-- Semua Unit --":
+            match_unit_kpi = [u for u in list_ui_kpi if str(u).upper() == selected_unit_filter.upper()]
+            if match_unit_kpi:
+                default_index_kpi = list_ui_kpi.index(match_unit_kpi[0])
+                st.caption(f"🔒 Filter global aktif — otomatis menampilkan analisis KPI untuk **{selected_unit_filter}**.")
+            else:
+                st.warning(f"Unit **{selected_unit_filter}** dari filter global belum memiliki data KPI di modul ini.")
+
+        selected_ui_kpi = st.selectbox("👉 Pilih Unit Induk untuk Analisis KPI:", list_ui_kpi, index=default_index_kpi)
         
         if selected_ui_kpi != "-- Pilih Unit Induk --":
             df_kpi_ui = df_kinerja_peg[df_kinerja_peg['Company Name'] == selected_ui_kpi].copy()
