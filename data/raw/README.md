@@ -1,6 +1,6 @@
 # Data Directory
 
-Folder ini tidak disertakan di repository karena berisi data confidential.
+File/sumber data di folder ini tidak disertakan di repository karena berisi data confidential.
 
 Letakkan file berikut sebelum menjalankan aplikasi:
 
