@@ -1,0 +1,123 @@
+/* ==========================================================
+   HR ANALYTICS DASHBOARD - STYLESHEET
+   Warna aksen utama mengikuti identitas korporat PLN
+========================================================== */
+
+:root { 
+    --pln-blue: #00A2E9; 
+    --pln-navy: #0C2340; 
+    --bg-light: #F7FAFC;
+    --border-light: #E2E8F0;
+}
+
+/* ----------------------------------------------------------
+   1. MAIN HEADER & COMPONENTS
+---------------------------------------------------------- */
+.main-header {
+    padding: 1.25rem 1.75rem;
+    border-radius: 12px;
+    background: linear-gradient(90deg, var(--pln-navy) 0%, var(--pln-blue) 100%);
+    margin-bottom: 1.25rem;
+}
+
+.main-header h1 {
+    color: #FFFFFF;
+    margin-bottom: 0.15rem;
+    font-size: 1.7rem;
+}
+
+.main-header p {
+    color: #E5F6FF;
+    margin-bottom: 0;
+    font-size: 0.95rem;
+}
+
+.tips-box {
+    background-color: #EAF7FF;
+    border-left: 4px solid var(--pln-blue);
+    padding: 0.65rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 0.92rem;
+    color: var(--pln-navy);
+}
+
+/* ----------------------------------------------------------
+   2. STREAMLIT OVERRIDES (TABS & MAIN METRICS)
+---------------------------------------------------------- */
+/* Rapikan tab agar lebih besar & mudah dibaca */
+.stTabs [data-baseweb="tab"] {
+    height: 48px;
+    white-space: pre-wrap;
+    border-radius: 8px 8px 0 0;
+    padding: 0 18px;
+    font-weight: 600;
+}
+
+.stTabs [aria-selected="true"] {
+    background-color: var(--pln-blue);
+    color: white;
+}
+
+/* Metric card (area utama) */
+div[data-testid="stMetric"] {
+    background-color: var(--bg-light);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+}
+
+/* ----------------------------------------------------------
+   3. SIDEBAR STYLING
+---------------------------------------------------------- */
+/* Sidebar: latar gelap sesuai warna PLN Navy */
+section[data-testid="stSidebar"] { 
+    background-color: var(--pln-navy); 
+}
+
+/* Ubah warna teks elemen tulisan di sidebar menjadi terang */
+section[data-testid="stSidebar"] .stMarkdown,
+section[data-testid="stSidebar"] h1, 
+section[data-testid="stSidebar"] h2, 
+section[data-testid="stSidebar"] h3, 
+section[data-testid="stSidebar"] p, 
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] [data-testid="stMetricValue"],
+section[data-testid="stSidebar"] [data-testid="stMetricLabel"] { 
+    color: #F5F9FF !important; 
+}
+
+section[data-testid="stSidebar"] hr { 
+    border-color: rgba(255,255,255,0.2); 
+}
+
+/* ----------------------------------------------------------
+   4. INPUT & SIDEBAR METRICS OVERRIDES
+---------------------------------------------------------- */
+/* Paksa input text berwarna gelap di atas putih agar selalu terlihat jelas */
+.stTextInput input {
+    color: var(--pln-navy) !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #CCCCCC !important;
+}
+
+/* Metric card di dalam sidebar ukurannya disesuaikan */
+section[data-testid="stSidebar"] div[data-testid="stMetric"] {
+    background-color: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 10px;
+    padding: 0.6rem 0.5rem; /* Padding dikurangi sedikit agar ruang lebih lega */
+}
+
+/* Menyesuaikan teks metrik pada sidebar agar tidak terpotong (elipsis) */
+section[data-testid="stSidebar"] [data-testid="stMetricValue"] {
+    color: #FFFFFF !important;
+    font-size: 1.05rem !important; /* Font diperkecil */
+    white-space: normal !important; 
+    word-wrap: break-word !important; 
+}
+
+section[data-testid="stSidebar"] [data-testid="stMetricLabel"] {
+    color: #B9D4EE !important;
+    font-size: 0.85rem !important;
+}

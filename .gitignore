@@ -1,0 +1,13 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Streamlit
+.streamlit/
+
+# Data rahasia
+data/raw/*
+!data/raw/README.md
+
+# Environment
+.env
