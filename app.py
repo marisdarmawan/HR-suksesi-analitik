@@ -13,6 +13,7 @@ from components.succession_view import render_succession_tab
 from components.kpi_view import render_kpi_tab
 from components.macro_analytics_view import render_macro_analytics_tab
 from components.profile_card import render_search_results
+from components.chatbot_view import render_chatbot_tab
 
 # ----------------------------------------------------------
 # 2. KONFIGURASI HALAMAN & STYLING
@@ -126,7 +127,8 @@ else:
     # ==========================================================
     # TABS UTAMA DASHBOARD
     # ==========================================================
-    tab1, tab2, tab3, tab4 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "🤖 Asisten AI",
         "🚨 EWS Pensiun & Masa Jabatan", 
         "🎯 Suksesi Jabatan", 
         "📈 Analitik KPI", 
@@ -135,10 +137,12 @@ else:
 
     # Lempar data (db) dan filter (selected_unit) ke masing-masing komponen
     with tab1:
-        render_ews_tab(db, selected_unit)
+        render_chatbot_tab()
     with tab2:
-        render_succession_tab(db, selected_unit)
+        render_ews_tab(db, selected_unit)
     with tab3:
+        render_succession_tab(db, selected_unit)
+    with tab4:
         render_kpi_tab(db, selected_unit)
-    with tab4: 
+    with tab5: 
         render_macro_analytics_tab(db, selected_unit)

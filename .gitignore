@@ -1,13 +1,21 @@
-# Python cache
+# Mengabaikan file kredensial (Rahasia)
+.env
+
+# Mengabaikan folder cache Python (Tidak perlu di-upload)
 __pycache__/
 *.pyc
 
-# Streamlit
-.streamlit/
+# Mengabaikan data mentah dan data turunan agar tidak bocor
+data/raw/
+*.csv
+*.xlsx
+*.PDF
 
-# Data rahasia
-data/raw/*
-!data/raw/README.md
+# Mengabaikan file database/vector (Karena bisa di-generate ulang)
+data/faiss_index/
+*.faiss
+*.pkl
 
-# Environment
-.env
+# Mengabaikan virtual environment (jika Anda pakai venv)
+venv/
+env/

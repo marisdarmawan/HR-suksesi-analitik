@@ -1,4 +1,9 @@
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables dari .env file
+load_dotenv()
 
 # ==========================================================
 # 1. PATH CONFIGURATION
@@ -62,3 +67,19 @@ PLN_COLORS = {
     'success': '#22C55E',
     'danger': '#EF4444'
 }
+
+# ==========================================================
+# 5. DATABASE CONFIGURATION (TEXT-TO-SQL)
+# ==========================================================
+import urllib.parse
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASS = os.getenv("DB_PASS", "P@ssw0rd")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME", "hc_pln")
+
+# Encode password yang mengandung spesial karakter (contoh: P@ssw0rd)
+DB_PASS_ENCODED = urllib.parse.quote_plus(DB_PASS)
+
+# Buat URI Connection String untuk SQLAlchemy/LangChain
+DB_URI = f"postgresql://{DB_USER}:{DB_PASS_ENCODED}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
